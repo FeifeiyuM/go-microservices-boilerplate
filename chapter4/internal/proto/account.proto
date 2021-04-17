@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = ".;pb";
+
+package pb;
+
+// 注册请求参数对象
+message RegisterReq {
+  // 姓名
+  string name = 1;
+  // 性别
+  int32 gender = 2;
+  // 地址
+  string address = 3;
+}
+
+// 请求结果
+message RegisterResp {
+  string msg = 1;
+}
+
+// 服务方法定义
+service Account {
+  // rpc 注册方法定义
+  rpc RegisterAccount (RegisterReq) returns (RegisterResp) {}
+}
