@@ -40,6 +40,7 @@ func NewServer(cfg *conf.Config, logger log.Factory) *server {
 func (s *server) initRestHandler() {
 	e := echo.New()
 	s.echo = e
+	middlewares.InitLogger(s.logger)
 	// 中间件引入
 	s.echo.Use(middlewares.EchoTracer, middlewares.EchoRequestID, middlewares.EchoStandardLogger,
 		middlewares.EchoErrorHandler, middlewares.EchoRecover)
