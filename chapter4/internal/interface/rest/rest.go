@@ -3,15 +3,20 @@ package rest
 import (
 	"fmt"
 	"gmb/pkg/gmberror"
+	"gmb/pkg/log"
 	"net/http"
 	"github.com/labstack/echo/v4"
 	"gmb/internal/service"
 )
 
-type httpHandler struct {}
+type httpHandler struct {
+	logger log.Factory
+}
 
-func NewHttpHandler() *httpHandler {
-	return &httpHandler{}
+func NewHttpHandler(logger log.Factory) *httpHandler {
+	return &httpHandler{
+		logger: logger,
+	}
 }
 
 // say hello

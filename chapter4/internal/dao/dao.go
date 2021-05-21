@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"fmt"
+	"gmb/pkg/log"
 )
 
 // 数据库 mock
@@ -25,11 +26,12 @@ func (d *DataBaseMock) Get(_ context.Context, param interface{}) (interface{}, e
 // dao 层基本对象
 type DaoBase struct {
 	d *DataBaseMock
+	logger log.Factory
 }
 
 var daoBase *DaoBase
 
-func InitDao(dataBase *DataBaseMock) {
+func InitDao(dataBase *DataBaseMock, logger log.Factory) {
 	daoBase = &DaoBase{}
 }
 

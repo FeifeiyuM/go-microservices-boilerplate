@@ -6,6 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/nsqio/go-nsq"
+	"gmb/internal/proto/pb"
+	"gmb/internal/service"
+	"gmb/pkg/gmberror"
 	"gmb/pkg/log"
 	"gmb/pkg/mq"
 )
@@ -17,6 +20,13 @@ type mqHandler struct {
 func NewMqHandler(logger log.Factory) *mqHandler {
 	return &mqHandler{
 		logger: logger,
+	}
+}
+
+// register
+func (m *mqHandler) Register(c *mq.NsqConsumer) {
+	if err := c.RegisterHandler("test-recv_hello", "test", m.recvHello); err != nil {
+		panic(err)
 	}
 }
 
@@ -35,9 +45,12 @@ func (m *mqHandler) recvHello(_ context.Context, msg *nsq.Message) error {
 	return nil
 }
 
-// register
-func (m *mqHandler) Register(c *mq.NsqConsumer) {
-	if err := c.RegisterHandler("test-recv_hello", "test", m.recvHello); err != nil {
-		panic(err)
+// 充值实现
+func (m *mqHandler) recharge(ctx context.Context, msg *nsq.Message) error {
+	req := &pb.AccountRechargeReq{}
+	err := json.Unmarshal(msg.Body, req)
+	if err != nil {
+		return gmberror.InvalidRequest(err)
 	}
+	return service.GetOrderSrv().AccountRecharge(ctx, req.AccId, int64(req.Amount), req.PayOrderId)
 }

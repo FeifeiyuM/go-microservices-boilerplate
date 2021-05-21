@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"github.com/FeifeiyuM/sqly"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"gmb/internal/interface/rpc"
 	"gmb/pkg/log"
@@ -14,25 +15,25 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"gmb/internal/interface/rest"
 	"gmb/internal/conf"
 	"gmb/internal/dao"
+	mq_handler "gmb/internal/interface/mq"
+	"gmb/internal/interface/rest"
 	"gmb/internal/service"
 	"gmb/pkg/mq"
-	mq_handler "gmb/internal/interface/mq"
 )
 
 type server struct {
 	logger log.Factory
-	cfg *conf.Config
-	echo *echo.Echo
-	nsq *mq.NsqConsumer
-	grpc *grpc.Server
+	cfg    *conf.Config
+	echo   *echo.Echo
+	nsq    *mq.NsqConsumer
+	grpc   *grpc.Server
 }
 
 func NewServer(cfg *conf.Config, logger log.Factory) *server {
 	return &server{
-		cfg: cfg,
+		cfg:    cfg,
 		logger: logger,
 	}
 }
@@ -75,15 +76,25 @@ func (s *server) initRpcHandler() {
 }
 
 func (s *server) initDaoLayer() {
-	dbMock := dao.NewNewDataBase()
-	dao.InitDao(dbMock, s.logger)
-	// init account dao 
+	dbOpt := &sqly.Option{}
+	db, err := sqly.New(dbOpt)
+	if err != nil {
+		panic(err)
+	}
+	dao.InitDao(db, nil, s.logger)
+	// init account dao
 	dao.InitAccountRepo()
+	// init order dao
+	dao.InitOrderRepo()
+	// init property dao
+	dao.InitPropertyRepo()
 }
 
 func (s *server) initServiceLayer() {
-	// init account service 
+	// init account service
 	service.InitAccountSrv(s.cfg, s.logger)
+	// init order service
+	service.InitOrderSrv(s.cfg, s.logger)
 }
 
 func (s *server) Run() {

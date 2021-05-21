@@ -4,15 +4,19 @@ import (
 	"context"
 	"gmb/internal/proto/pb"
 	"gmb/internal/service"
+	"gmb/pkg/log"
 	"google.golang.org/grpc"
 )
 
 type rpcHandler struct {
+	logger log.Factory
 	pb.UnimplementedAccountServer
 }
 
-func NewRpcHandler() *rpcHandler {
-	return &rpcHandler{}
+func NewRpcHandler(logger log.Factory) *rpcHandler {
+	return &rpcHandler{
+		logger: logger,
+	}
 }
 
 // 账号注册
